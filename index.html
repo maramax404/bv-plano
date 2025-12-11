@@ -54,15 +54,15 @@
             // Quando você colocar no GitHub, renomeie suas fotos para estes nomes exatos
             // e coloque na mesma pasta do arquivo index.html.
             const images = [
-                "./foto1.jpeg", 
+                "./foto1.jpg", 
                 "./foto2.jpg",
                 "./foto3.jpg",
                 "./foto4.jpg",
-                "./foto5.jpeg"
-                "./foto6.jpeg", 
-                "./foto7.jpeg",
-                "./foto8.jpeg",
-                "./foto9.jpeg",
+                "./foto5.jpg"
+                "./foto6.jpg", 
+                "./foto7.jpg",
+                "./foto8.jpg",
+                "./foto9.jpg",
                 "./foto10.jpg"
             ];
 
@@ -76,7 +76,7 @@
             useEffect(() => {
                 const imageTimer = setInterval(() => {
                     setCurrentImageIndex((prev) => (prev + 1) % images.length);
-                }, 5000);
+                }, 15000);
                 return () => clearInterval(imageTimer);
             }, [images.length]);
 
@@ -240,3 +240,4 @@
 </body>
 
 </html>
+
