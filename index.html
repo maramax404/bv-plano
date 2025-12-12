@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BV Plano</title>
+    
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; color: white; font-family: sans-serif; }
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #1a1a1a; z-index: 9999; }
+        #error-log { color: #ff6b6b; background: #330000; padding: 20px; border-radius: 8px; max-width: 80%; display: none; margin-top: 20px; }
+        
+        /* Animações */
+        @keyframes fade-in-down { 0% { opacity: 0; transform: translateY(-20px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes fade-in-up { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes slide-up { 0% { opacity: 0; transform: translateY(50px); } 100% { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in-down { animation: fade-in-down 1s ease-out forwards; }
+        .animate-fade-in-up { animation: fade-in-up 1s ease-out forwards; }
+        .animate-slide-up { animation: slide-up 1s ease-out 0.5s forwards; }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    screens: {
+                        'xs': '320px',
+                        'tall': { 'raw': '(min-aspect-ratio: 1/2)' },
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <div id="loading-screen">
+        <h2 id="status-text">Carregando sistema...</h2>
+        <p style="color: #888; font-size: 0.9em;">Se esta tela não sair em 5 segundos, algo deu errado.</p>
+        <div id="error-log"></div>
+    </div>
+
+    <div id="root"></div>
+
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            document.getElementById('status-text').innerText = "Ocorreu um erro!";
+            const errorDiv = document.getElementById('error-log');
+            errorDiv.style.display = 'block';
+            errorDiv.innerHTML = `<strong>Erro:</strong> ${message}<br><small>${source}:${lineno}</small>`;
+        };
+    </script>
+
+    <script type="text/babel">
+        try {
+            const { useState, useEffect, useRef } = React;
+
+            // Ícones
+            const IconClock = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
+            const IconCalendar = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>;
+            const IconMapPin = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>;
+            const IconRotate = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>;
+            const IconMaximize = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>;
+            const IconInstagram = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>;
+            const IconPhone = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>;
+            const IconMail = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>;
+            const IconGlobe = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>;
+
+            const App = () => {
+                const [currentTime, setCurrentTime] = useState(new Date());
+                const [currentImageIndex, setCurrentImageIndex] = useState(0);
+                const [rotationAngle, setRotationAngle] = useState(0);
+                const canvasRef = useRef(null);
+
+                const images = [
+                    "foto1.jpg", 
+                    "foto2.jpg",
+                    "foto3.jpg",
+                    "foto4.jpg", 
+                    "foto5.jpg",
+                    "foto6.jpg",
+                    "foto7.jpg", 
+                    "foto8.jpg",
+                    "foto9.jpg",
+                    "foto10.jpg"
+                ];
+
+                useEffect(() => {
+                    const loading = document.getElementById('loading-screen');
+                    if(loading) loading.style.display = 'none';
+
+                    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+                    return () => clearInterval(timer);
+                }, []);
+
+                // Wake Lock
+                useEffect(() => {
+                    const requestWakeLock = async () => {
+                        try {
+                            if ('wakeLock' in navigator) {
+                                let wakeLock = await navigator.wakeLock.request('screen');
+                                console.log('Bloqueio de tela ativado!');
+                                wakeLock.addEventListener('release', () => {
+                                    console.log('Bloqueio de tela liberado, tentando reconectar...');
+                                    requestWakeLock();
+                                });
+                            }
+                        } catch (err) {
+                            console.log('Erro ao ativar Wake Lock:', err.name, err.message);
+                        }
+                    };
+
+                    requestWakeLock();
+                    const handleInteraction = () => requestWakeLock();
+                    document.addEventListener('visibilitychange', handleInteraction);
+                    window.addEventListener('click', handleInteraction);
+                    window.addEventListener('touchstart', handleInteraction);
+
+                    return () => {
+                        document.removeEventListener('visibilitychange', handleInteraction);
+                        window.removeEventListener('click', handleInteraction);
+                        window.removeEventListener('touchstart', handleInteraction);
+                    };
+                }, []);
+
+                useEffect(() => {
+                    const imageTimer = setInterval(() => {
+                        setCurrentImageIndex((prev) => (prev + 1) % images.length);
+                    }, 15000); 
+                    return () => clearInterval(imageTimer);
+                }, [images.length]);
+
+                // Canvas
+                useEffect(() => {
+                    const canvas = canvasRef.current;
+                    const ctx = canvas.getContext('2d');
+                    let animationFrameId;
+
+                    const resizeCanvas = () => {
+                        const isVertical = Math.abs(rotationAngle) === 90 || Math.abs(rotationAngle) === 270;
+
+                        if (isVertical) {
+                            canvas.width = window.innerHeight;
+                            canvas.height = window.innerWidth;
+                        } else {
+                            canvas.width = window.innerWidth;
+                            canvas.height = window.innerHeight;
+                        }
+                    };
+
+                    resizeCanvas();
+                    window.addEventListener('resize', resizeCanvas);
+
+                    class Particle {
+                        constructor() {
+                            this.x = Math.random() * canvas.width;
+                            this.y = canvas.height + Math.random() * 200;
+                            this.speed = 0.5 + Math.random() * 1.5;
+                            this.radius = Math.random() * 3 + 1;
+                            this.opacity = Math.random() * 0.5 + 0.1;
+                        }
+                        update() {
+                            this.y -= this.speed;
+                            if (this.y < -50) {
+                                this.y = canvas.height + 50;
+                                this.x = Math.random() * canvas.width;
+                            }
+                        }
+                        draw() {
+                            ctx.beginPath();
+                            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                            ctx.fillStyle = `rgba(21, 128, 61, ${this.opacity})`; 
+                            ctx.fill();
+                        }
+                    }
+
+                    const particles = [];
+                    for (let i = 0; i < 60; i++) particles.push(new Particle());
+
+                    const animate = () => {
+                        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                        gradient.addColorStop(0, '#86efac'); 
+                        gradient.addColorStop(1, '#ffffff'); 
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        particles.forEach(p => { p.update(); p.draw(); });
+                        animationFrameId = window.requestAnimationFrame(animate);
+                    };
+                    animate();
+                    return () => {
+                        window.removeEventListener('resize', resizeCanvas);
+                        window.cancelAnimationFrame(animationFrameId);
+                    };
+                }, [rotationAngle]);
+
+                const toggleFullScreen = () => {
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen();
+                    } else if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                };
+
+                const rotateScreen = () => {
+                    setRotationAngle(prev => (prev - 90) % 360);
+                };
+
+                const getRotationStyle = () => {
+                    if (rotationAngle === 0) return { width: '100%', height: '100%' };
+                    const isVertical = Math.abs(rotationAngle) === 90 || Math.abs(rotationAngle) === 270;
+                    return {
+                        transform: `rotate(${rotationAngle}deg)`,
+                        transformOrigin: 'center center',
+                        width: isVertical ? '100vh' : '100vw',
+                        height: isVertical ? '100vw' : '100vh',
+                        position: 'absolute',
+                        top: '50%', left: '50%', translate: '-50% -50%',
+                    };
+                };
+
+                const timeString = currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                const dateString = currentTime.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+                return (
+                    <div className="relative w-full h-[100dvh] overflow-hidden font-sans text-gray-900 bg-white transition-all duration-500">
+                        <div className="w-full h-full relative" style={getRotationStyle()}>
+                            
+                            <canvas ref={canvasRef} className="fixed top-0 left-0 w-full h-full block z-0" />
+
+                            {/* CONTAINER PRINCIPAL: Padding aumentado para p-4 para segurança nas bordas */}
+                            <div className="relative z-10 flex flex-col justify-between h-full p-4 max-w-full mx-auto gap-2">
+                                
+                                {/* CABEÇALHO */}
+                                <div className="flex-none flex justify-between items-start animate-fade-in-down px-2 mt-2">
+                                    <div className="flex flex-col">
+                                        <h1 className="text-2xl xs:text-3xl md:text-5xl lg:text-6xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-emerald-900 uppercase">
+                                            BV Plano
+                                        </h1>
+                                        <span className="text-gray-600 text-[10px] xs:text-xs md:text-lg tracking-widest mt-1 md:mt-2 uppercase">
+                                            Assistência Funeral
+                                        </span>
+                                        <img 
+                                            src="logo.png" 
+                                            alt="Logo BV Plano" 
+                                            className="mt-2 w-auto h-12 md:h-20 object-contain self-start"
+                                            onError={(e) => e.target.style.display = 'none'}
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-2 md:gap-4">
+                                        <a 
+                                            href="https://bvplano.com.br/" 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="hidden xs:flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white text-xs md:text-sm px-3 py-2 md:px-4 md:py-2 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95"
+                                        >
+                                            <IconGlobe className="w-4 h-4" />
+                                            <span className="font-semibold">Acessar Site</span>
+                                        </a>
+
+                                        <button onClick={rotateScreen} className="bg-black/10 hover:bg-black/20 p-2 md:p-3 rounded-full transition-all backdrop-blur-sm group z-50 flex flex-col items-center justify-center">
+                                            <IconRotate className="w-5 h-5 md:w-6 md:h-6 text-gray-800 group-hover:rotate-90 transition-transform duration-500" />
+                                            <span className="text-[9px] md:text-[10px] text-gray-800 font-bold">{Math.abs(rotationAngle)}°</span>
+                                        </button>
+                                        <button onClick={toggleFullScreen} className="bg-black/10 hover:bg-black/20 p-2 md:p-3 rounded-full transition-all backdrop-blur-sm group">
+                                            <IconMaximize className="w-5 h-5 md:w-6 md:h-6 text-gray-800 group-hover:scale-110 transition-transform" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* ÁREA DA IMAGEM: Largura restringida para não bater nas bordas */}
+                                <div className="flex-1 min-h-0 w-full relative flex items-center justify-center my-1">
+                                    {/* Alterado de w-full para w-[92%] e adicionado max-w-7xl para criar margens laterais */}
+                                    <div className="relative w-[92%] md:w-[85%] max-w-7xl h-full max-h-[75vh] rounded-2xl md:rounded-3xl overflow-hidden shadow-xl md:shadow-2xl animate-fade-in-up bg-white/20">
+                                        {images.map((img, index) => (
+                                            <img
+                                                key={index}
+                                                src={img}
+                                                onError={(e) => { e.target.style.display = 'none'; }}
+                                                alt={`Slide ${index}`}
+                                                className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-[3000ms] ease-in-out ${
+                                                    index === currentImageIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                                                }`}
+                                            />
+                                        ))}
+                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10"><p className="text-gray-400 text-sm">Carregando...</p></div>
+                                        <div className="absolute inset-0 ring-1 ring-white/20 rounded-2xl md:rounded-3xl pointer-events-none"></div>
+                                    </div>
+                                </div>
+
+                                {/* RODAPÉ */}
+                                <div className="flex-none bg-white/60 backdrop-blur-md rounded-2xl md:rounded-3xl p-3 md:p-5 border border-white/50 shadow-xl animate-slide-up text-gray-800 mb-2 mx-1">
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-2 md:gap-6 items-start">
+                                        
+                                        <div className="flex flex-col gap-1">
+                                            <div className="flex items-center gap-2 text-green-800 font-bold text-xs md:text-sm uppercase tracking-wider">
+                                                <IconClock className="w-4 h-4" /> Agora
+                                            </div>
+                                            <div className="text-xl md:text-2xl font-mono font-bold leading-none">{timeString}</div>
+                                            <div className="text-xs md:text-sm opacity-80 capitalize">{dateString}</div>
+                                        </div>
+
+                                        <div className="flex flex-col gap-1">
+                                            <div className="flex items-center gap-2 text-green-800 font-bold text-xs md:text-sm uppercase tracking-wider">
+                                                <IconInstagram className="w-4 h-4" /> Social
+                                            </div>
+                                            <div className="text-sm md:text-base font-semibold">@bvplano</div>
+                                            <div className="flex items-center gap-1 text-[10px] md:text-xs opacity-70 mt-1">
+                                                <IconMapPin className="w-3 h-3" /> Memorial São Pedro
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col gap-1 col-span-2 md:col-span-1">
+                                            <div className="flex items-center gap-2 text-green-800 font-bold text-xs md:text-sm uppercase tracking-wider">
+                                                <IconPhone className="w-4 h-4" /> Unidades
+                                            </div>
+                                            <div className="flex flex-col gap-1">
+                                                <div className="text-[10px] md:text-xs">
+                                                    <span className="font-bold">João Câmara:</span><br/>(84) 98630-8443
+                                                </div>
+                                                <div className="text-[10px] md:text-xs">
+                                                    <span className="font-bold">Poço Branco:</span><br/>(84) 98891-1893
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col gap-1 col-span-2 md:col-span-1">
+                                            <div className="flex items-center gap-2 text-green-800 font-bold text-xs md:text-sm uppercase tracking-wider">
+                                                <IconMail className="w-4 h-4" /> E-mail
+                                            </div>
+                                            <div className="text-[10px] md:text-xs break-all leading-tight">
+                                                contato@bvfuneraria.com.br
+                                            </div>
+                                            <div className="text-[10px] md:text-xs break-all leading-tight text-gray-600">
+                                                bvfunerariapb@gmail.com
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(<App />);
+            
+        } catch (err) {
+            document.getElementById('status-text').innerText = "Erro Fatal no Script";
+            document.getElementById('error-log').style.display = 'block';
+            document.getElementById('error-log').innerHTML = err.toString();
+        }
+    </script>
+</body>
+</html>
