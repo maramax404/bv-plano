@@ -134,7 +134,7 @@
                 useEffect(() => {
                     const imageTimer = setInterval(() => {
                         setCurrentImageIndex((prev) => (prev + 1) % images.length);
-                    }, 15000); 
+                    }, 10000); 
                     return () => clearInterval(imageTimer);
                 }, [images.length]);
 
@@ -366,4 +366,5 @@
         }
     </script>
 </body>
+
 </html>
