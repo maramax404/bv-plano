@@ -9,42 +9,41 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
-        /* Tira margens e esconde barras de rolagem */
         body, html { margin: 0; padding: 0; background-color: #000; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
         /* ========================================== */
-        /* MÁGICA DA ROTAÇÃO FORÇADA                  */
+        /* MÁGICA DA ROTAÇÃO 360º PERFEITA            */
         /* ========================================== */
-        #tv-container {
-            width: 100vw; 
-            height: 100vh;
+        #tv-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            background-color: #111;
             display: flex; 
             flex-direction: column;
-            background-color: #f4f6f9;
-            transition: all 0.5s ease;
-            position: absolute;
-            top: 0; left: 0;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); /* Animação suave de giro */
+            
+            /* Padrão TV Deitada (Horizontal) */
+            width: 100vw; 
+            height: 100vh;
+            transform: translate(-50%, -50%) rotate(0deg);
         }
 
-        /* Classe que aplica o giro de 90 graus e inverte Largura com Altura */
-        #tv-container.girado {
-            transform: rotate(90deg);
-            transform-origin: top left;
+        /* Classe ativada apenas quando a TV está "em pé" (90º ou 270º) */
+        #tv-wrapper.vertical {
             width: 100vh; /* A largura passa a ser a altura da tela */
             height: 100vw; /* A altura passa a ser a largura da tela */
-            left: 100vw; /* Empurra para o canto certo após girar */
         }
 
         /* ========================================== */
-        /* ESTRUTURA DOS BLOCOS (CABEÇALHO, MEIO E FIM)*/
+        /* ESTRUTURA DOS BLOCOS                       */
         /* ========================================== */
         header { background-color: #ffffff; padding: 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 5px solid #1B5E20; z-index: 10; }
         footer { background-color: #1B5E20; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; z-index: 10; box-shadow: 0 -5px 15px rgba(0,0,0,0.2); }
-        
         main { flex-grow: 1; position: relative; overflow: hidden; background-color: #111; }
 
         /* ========================================== */
-        /* ESTILO DOS SLIDES (FOTOS DE FUNDO)         */
+        /* ESTILO DOS SLIDES                          */
         /* ========================================== */
         .slide {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -54,32 +53,31 @@
         }
         .slide.ativo { opacity: 1; z-index: 5; }
 
-        /* Película escura sobre a foto para o texto branco dar leitura */
         .pelicula-escura {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%);
-            z-index: -1; /* Fica atrás do texto, mas na frente da foto */
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%);
+            z-index: -1;
         }
 
-        /* Tipografia dos Slides */
         .slide-tag { background-color: #ffc107; color: #000; font-weight: 900; font-size: 2rem; padding: 0.5rem 2rem; border-radius: 50px; margin-bottom: 2rem; text-transform: uppercase; }
         .slide-titulo { color: white; font-size: 6rem; font-weight: 900; text-transform: uppercase; text-shadow: 2px 4px 10px rgba(0,0,0,0.8); line-height: 1.1; margin-bottom: 1rem;}
         .slide-preco { color: #4CAF50; font-size: 8rem; font-weight: 900; text-shadow: 2px 4px 10px rgba(0,0,0,0.8); margin: 2rem 0; line-height: 1;}
         .slide-desc { color: #f8f9fa; font-size: 3rem; font-weight: 300; text-shadow: 1px 2px 5px rgba(0,0,0,0.8); }
 
-        /* Botões de Controlo (Ficam escondidos no canto e só aparecem se passar o rato) */
+        /* Botões de Controlo Ocultos */
         #painel-controles { position: fixed; bottom: 20px; right: 20px; z-index: 9999; opacity: 0.1; transition: opacity 0.3s; }
         #painel-controles:hover { opacity: 1; }
     </style>
 </head>
 <body>
 
-    <div id="painel-controles" class="bg-dark p-2 rounded shadow">
-        <button class="btn btn-warning fw-bold me-2" onclick="girarTela()"><i class="bi bi-arrow-clockwise me-1"></i>Girar TV</button>
-        <button class="btn btn-primary fw-bold" onclick="telaCheia()"><i class="bi bi-arrows-fullscreen me-1"></i>Tela Cheia</button>
+    <div id="painel-controles" class="bg-dark p-2 rounded shadow d-flex gap-2">
+        <button class="btn btn-warning fw-bold" onclick="girar(-90)" title="Girar para a Esquerda"><i class="bi bi-arrow-counterclockwise fs-4"></i></button>
+        <button class="btn btn-warning fw-bold" onclick="girar(90)" title="Girar para a Direita"><i class="bi bi-arrow-clockwise fs-4"></i></button>
+        <button class="btn btn-primary fw-bold" onclick="telaCheia()" title="Tela Cheia"><i class="bi bi-arrows-fullscreen fs-4"></i></button>
     </div>
 
-    <div id="tv-container">
+    <div id="tv-wrapper">
         
         <header>
             <div class="d-flex align-items-center">
@@ -89,7 +87,7 @@
                     <p class="m-0 text-muted fw-bold" style="font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px;">Assistência Funeral</p>
                 </div>
             </div>
-            <div class="d-flex align-items-center bg-light px-4 py-2 rounded-pill border">
+            <div class="d-flex align-items-center bg-light px-4 py-2 rounded-pill border shadow-sm">
                 <i class="bi bi-clock-fill text-dark me-3" style="font-size: 2.5rem;"></i>
                 <span id="relogio-tv" class="fw-bold text-dark" style="font-size: 3rem; font-variant-numeric: tabular-nums;">00:00</span>
             </div>
@@ -112,14 +110,14 @@
                 <div class="slide-titulo text-white">Coroas de<br>Flores Naturais</div>
                 <div class="slide-desc">Lindas homenagens preparadas com flores frescas da estação.</div>
                 <div class="slide-preco text-white">R$ 150<small style="font-size: 4rem;">,00</small></div>
-                <div class="slide-desc fw-bold text-info">Entrega Imediata</div>
+                <div class="slide-desc fw-bold text-info">Consulte Modelos no Balcão</div>
             </div>
 
             <div class="slide" style="background-color: #1B5E20;">
                 <div class="pelicula-escura"></div>
                 <i class="bi bi-heart-pulse text-white mb-4" style="font-size: 12rem;"></i>
                 <div class="slide-titulo">Cuidamos de<br>quem você ama</div>
-                <div class="slide-desc mt-4">Plantão 24 Horas com atendimento humanizado e frota própria.</div>
+                <div class="slide-desc mt-4">Atendimento humanizado e frota própria à sua disposição.</div>
             </div>
 
         </main>
@@ -144,9 +142,7 @@
     </div>
 
     <script>
-        // ==========================================
-        // LÓGICA DO RELÓGIO
-        // ==========================================
+        // Relógio
         function atualizarRelogio() {
             const agora = new Date();
             const horas = String(agora.getHours()).padStart(2, '0');
@@ -157,54 +153,55 @@
         atualizarRelogio();
 
         // ==========================================
-        // LÓGICA DE GIRAR TELA E MEMÓRIA
+        // NOVA LÓGICA DE GIRO (DIREITA/ESQUERDA)
         // ==========================================
-        const containerTv = document.getElementById('tv-container');
-        
-        // Verifica se já tinha sido girada antes (memória)
-        if (localStorage.getItem('tvGirada') === 'sim') {
-            containerTv.classList.add('girado');
-        }
+        let anguloAtual = parseInt(localStorage.getItem('tvAngulo')) || 0;
+        const wrapper = document.getElementById('tv-wrapper');
 
-        function girarTela() {
-            containerTv.classList.toggle('girado');
-            // Salva na memória
-            if (containerTv.classList.contains('girado')) {
-                localStorage.setItem('tvGirada', 'sim');
+        function aplicarRotacao() {
+            // Normaliza o ângulo para garantir que seja 0, 90, 180 ou 270
+            let anguloNormalizado = ((anguloAtual % 360) + 360) % 360;
+
+            // Se estiver em 90 ou 270 (TV em pé), inverte largura e altura
+            if (anguloNormalizado === 90 || anguloNormalizado === 270) {
+                wrapper.classList.add('vertical');
             } else {
-                localStorage.setItem('tvGirada', 'nao');
+                wrapper.classList.remove('vertical');
             }
+
+            // Aplica a rotação visual
+            wrapper.style.transform = `translate(-50%, -50%) rotate(${anguloAtual}deg)`;
+            localStorage.setItem('tvAngulo', anguloAtual);
         }
 
+        function girar(graus) {
+            anguloAtual += graus;
+            aplicarRotacao();
+        }
+
+        // Chama ao carregar a página
+        aplicarRotacao();
+
+        // Tela Cheia
         function telaCheia() {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    alert(`Erro ao tentar tela cheia: ${err.message}`);
-                });
+                document.documentElement.requestFullscreen();
             } else {
                 document.exitFullscreen();
             }
         }
 
-        // ==========================================
-        // LÓGICA DE PASSAR OS SLIDES
-        // ==========================================
+        // Slides
         const slides = document.querySelectorAll('.slide');
         let slideAtual = 0;
-        const TEMPO_SLIDE = 8000; // 8 Segundos por tela
-
-        function passarSlide() {
+        setInterval(() => {
             slides[slideAtual].classList.remove('ativo');
             slideAtual = (slideAtual + 1) % slides.length;
             slides[slideAtual].classList.add('ativo');
-        }
+        }, 8000);
 
-        setInterval(passarSlide, TEMPO_SLIDE);
-
-        // Atualiza a página inteira a cada 1 hora para buscar novos dados do Django (quando integrarmos)
-        setTimeout(() => {
-            window.location.reload();
-        }, 3600000);
+        // Auto-refresh a cada 1 hora
+        setTimeout(() => window.location.reload(), 3600000);
     </script>
 </body>
 </html>
