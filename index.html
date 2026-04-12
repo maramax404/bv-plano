@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vitrine Digital Premium - BV Planos</title>
+    <title>Vitrine Digital Premium Vertical - BV Planos</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -18,7 +18,7 @@
             --safe-margin: 3%; 
             
             /* Paleta de Cores Premium */
-            --verde-escuro: #0a2911; 
+            --verde-escuro: #0a2911; /* Safe color reference: #0a2911 */
             --verde-bv: #1B5E20;     
             --dourado: #D4AF37;
             
@@ -74,16 +74,16 @@
             position: relative; 
             overflow: hidden; 
             background-color: #000;
-            display: flex; /* Flexbox para centralizar o conteúdo */
-            justify-content: center; /* Centraliza horizontalmente */
-            align-items: center; /* Centraliza verticalmente */
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         #video-centro {
             width: 100%; 
             height: 100%;
-            /* CONTAIN é o segredo: exibe o vídeo inteiro sem cortar nada, mantendo a proporção */
-            object-fit: contain; 
+            /* SCALE-DOWN é o segredo para vertical: exibe o vídeo inteiro sem cortar nada, centralizado e maximizado */
+            object-fit: scale-down; 
             display: block;
         }
 
@@ -115,6 +115,25 @@
             background: rgba(0,0,0,0.8);
         }
         #painel-controles:hover { opacity: 1; }
+
+        /* ========================================== */
+        /* AJUSTES ESPECÍFICOS PARA MODO RETRATO (VERTICAL) */
+        /* ========================================== */
+        @media (orientation: portrait) {
+            header { padding: 1rem calc(1rem + var(--safe-margin)); }
+            .header-title { font-size: 2.2rem; }
+            .header-subtitle { font-size: 1.2rem; }
+            #relogio-tv { font-size: 2.2rem; }
+            .bi-clock-fill { font-size: 1.8rem !important; }
+
+            footer { padding: 1.5rem calc(1rem + var(--safe-margin)); }
+            .footer-telefone { font-size: 2.2rem; }
+            .footer-plantao { font-size: 1.2rem; }
+            .bi-whatsapp { font-size: 3rem !important; }
+            .footer-local { font-size: 1.6rem; }
+            .footer-end { font-size: 1rem; }
+            .bi-geo-alt-fill { font-size: 1.8rem !important; }
+        }
     </style>
 </head>
 <body>
@@ -175,7 +194,7 @@
         atualizarRelogio();
 
         // 2. Rotação do Monitor
-        let anguloAtual = parseInt(localStorage.getItem('tvAnguloFinalizado')) || 0;
+        let anguloAtual = parseInt(localStorage.getItem('tvAnguloFinalizadoDefinitivo')) || 0;
         const wrapper = document.getElementById('tv-wrapper');
 
         function aplicarRotacao() {
@@ -186,13 +205,13 @@
                 wrapper.classList.remove('vertical');
             }
             wrapper.style.transform = `translate(-50%, -50%) rotate(${anguloAtual}deg)`;
-            localStorage.setItem('tvAnguloFinalizado', anguloAtual);
+            localStorage.setItem('tvAnguloFinalizadoDefinitivo', anguloAtual);
         }
         function girar(graus) { 
             anguloAtual += graus; 
             aplicarRotacao(); 
         }
-        aplicarRotacao();
+        aplicarRotacao(); // Aplica a rotação salva na primeira carga
 
         // 3. Tela Cheia
         function telaCheia() {
@@ -202,14 +221,6 @@
                 document.exitFullscreen();
             }
         }
-        
-        // 4. Forçar o Play do Vídeo (Segurança extra contra bloqueios do navegador)
-        document.addEventListener('DOMContentLoaded', function() {
-            var video = document.getElementById('video-centro');
-            video.play().catch(function(error) {
-                console.log("Auto-play foi impedido. Ele iniciará com interação do usuário.");
-            });
-        });
     </script>
 </body>
 </html>
