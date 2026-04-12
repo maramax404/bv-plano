@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vitrine Digital Premium Vertical - BV Plano</title>
+    <title>Vitrine Digital Premium Vertical - BV Planos</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -14,14 +14,10 @@
     
     <style>
         :root {
-            /* Margem de segurança para a TV */
             --safe-margin: 3%; 
-            
-            /* Paleta de Cores Premium */
-            --verde-escuro: #0a2911; /* Safe color reference: #0a2911 */
+            --verde-escuro: #0a2911; 
             --verde-bv: #1B5E20;     
             --dourado: #D4AF37;
-            
             --font-title: 'Playfair Display', serif;
             --font-body: 'Montserrat', sans-serif;
         }
@@ -41,12 +37,13 @@
             transform: translate(-50%, -50%) rotate(0deg);
         }
 
+        /* Quando a TV é girada pelo botão, ela ganha essa classe */
         #tv-wrapper.vertical {
             width: 100vh; height: 100vw; 
         }
 
         /* ========================================== */
-        /* CABEÇALHO (BLOCO SÓLIDO BRANCO)            */
+        /* CABEÇALHO PADRÃO                           */
         /* ========================================== */
         header { 
             background-color: #ffffff; 
@@ -58,13 +55,13 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
         
-        .header-title { color: var(--verde-escuro); font-family: var(--font-title); font-size: 3.8rem; font-weight: 900; line-height: 1; }
-        .header-subtitle { color: #666; font-size: 1.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 3px; }
-
-        .relogio-box {
-            background-color: #f4f4f4;
-            border: 2px solid #e0e0e0;
-        }
+        .header-logo { height: 5rem; transition: height 0.3s; }
+        .header-title { color: var(--verde-escuro); font-family: var(--font-title); font-size: 3.8rem; font-weight: 900; line-height: 1; transition: font-size 0.3s; }
+        .header-subtitle { color: #666; font-size: 1.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 3px; transition: font-size 0.3s; }
+        
+        .relogio-box { background-color: #f4f4f4; border: 2px solid #e0e0e0; }
+        #relogio-tv { font-size: 3.2rem; transition: font-size 0.3s; }
+        .relogio-icone { font-size: 2.5rem; transition: font-size 0.3s; }
 
         /* ========================================== */
         /* CENTRO: ÁREA EXCLUSIVA E CENTRADA DO VÍDEO */
@@ -82,13 +79,13 @@
         #video-centro {
             width: 100%; 
             height: 100%;
-            /* SCALE-DOWN é o segredo para vertical: exibe o vídeo inteiro sem cortar nada, centralizado e maximizado */
-            object-fit: scale-down; 
+            /* CONTAIN: Garante que o vídeo ocupe o máximo de espaço possível sem cortar nada */
+            object-fit: contain; 
             display: block;
         }
 
         /* ========================================== */
-        /* RODAPÉ (BLOCO SÓLIDO VERDE ESCURO)         */
+        /* RODAPÉ PADRÃO                              */
         /* ========================================== */
         footer { 
             background-color: var(--verde-escuro); 
@@ -100,11 +97,13 @@
             box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
         }
         
-        .footer-plantao { font-size: 1.4rem; text-transform: uppercase; color: var(--dourado); font-weight: 700; letter-spacing: 2px; }
-        .footer-telefone { font-size: 3.6rem; font-weight: 800; line-height: 1; color: white; }
+        .footer-icone-zap { font-size: 4.5rem; transition: font-size 0.3s; }
+        .footer-plantao { font-size: 1.4rem; text-transform: uppercase; color: var(--dourado); font-weight: 700; letter-spacing: 2px; transition: font-size 0.3s; }
+        .footer-telefone { font-size: 3.6rem; font-weight: 800; line-height: 1; color: white; transition: font-size 0.3s; }
         
-        .footer-local { font-size: 2.2rem; font-weight: 700; color: white; }
-        .footer-end { font-size: 1.4rem; color: #a5d6a7; font-weight: 400; }
+        .footer-icone-local { font-size: 2.5rem; transition: font-size 0.3s; }
+        .footer-local { font-size: 2.2rem; font-weight: 700; color: white; transition: font-size 0.3s; }
+        .footer-end { font-size: 1.4rem; color: #a5d6a7; font-weight: 400; transition: font-size 0.3s; }
 
         /* ========================================== */
         /* CONTROLES TÉCNICOS OCULTOS                 */
@@ -117,23 +116,23 @@
         #painel-controles:hover { opacity: 1; }
 
         /* ========================================== */
-        /* AJUSTES ESPECÍFICOS PARA MODO RETRATO (VERTICAL) */
+        /* MÁGICA DA TELA EM PÉ (Quando rotacionado)  */
         /* ========================================== */
-        @media (orientation: portrait) {
-            header { padding: 1rem calc(1rem + var(--safe-margin)); }
-            .header-title { font-size: 2.2rem; }
-            .header-subtitle { font-size: 1.2rem; }
-            #relogio-tv { font-size: 2.2rem; }
-            .bi-clock-fill { font-size: 1.8rem !important; }
+        #tv-wrapper.vertical header { padding: 1.5rem calc(1rem + var(--safe-margin)); }
+        #tv-wrapper.vertical .header-logo { height: 3.5rem; }
+        #tv-wrapper.vertical .header-title { font-size: 2.4rem; }
+        #tv-wrapper.vertical .header-subtitle { font-size: 1rem; }
+        #tv-wrapper.vertical .relogio-icone { font-size: 1.8rem !important; }
+        #tv-wrapper.vertical #relogio-tv { font-size: 2.2rem; }
 
-            footer { padding: 1.5rem calc(1rem + var(--safe-margin)); }
-            .footer-telefone { font-size: 2.2rem; }
-            .footer-plantao { font-size: 1.2rem; }
-            .bi-whatsapp { font-size: 3rem !important; }
-            .footer-local { font-size: 1.6rem; }
-            .footer-end { font-size: 1rem; }
-            .bi-geo-alt-fill { font-size: 1.8rem !important; }
-        }
+        #tv-wrapper.vertical footer { padding: 1.5rem calc(1rem + var(--safe-margin)); }
+        #tv-wrapper.vertical .footer-icone-zap { font-size: 3rem !important; }
+        #tv-wrapper.vertical .footer-telefone { font-size: 2.2rem; }
+        #tv-wrapper.vertical .footer-plantao { font-size: 1rem; }
+        
+        #tv-wrapper.vertical .footer-icone-local { font-size: 1.8rem !important; }
+        #tv-wrapper.vertical .footer-local { font-size: 1.6rem; }
+        #tv-wrapper.vertical .footer-end { font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -148,15 +147,15 @@
         
         <header>
             <div class="d-flex align-items-center">
-                <img src="logo.png" alt="Logo" class="me-4" style="height: 5rem;">
+                <img src="logo.png" alt="Logo" class="me-4 header-logo">
                 <div>
-                    <h1 class="m-0 header-title">BV PLANO</h1>
+                    <h1 class="m-0 header-title">BV PLANOS</h1>
                     <p class="m-0 header-subtitle">Assistência Funeral</p>
                 </div>
             </div>
-            <div class="d-flex align-items-center relogio-box px-4 py-2 rounded-pill shadow-sm">
-                <i class="bi bi-clock-fill text-dark me-3" style="font-size: 2.5rem;"></i>
-                <span id="relogio-tv" class="fw-bold text-dark" style="font-size: 3.2rem; font-variant-numeric: tabular-nums;">00:00</span>
+            <div class="d-flex align-items-center relogio-box px-3 py-1 rounded-pill shadow-sm">
+                <i class="bi bi-clock-fill text-dark me-2 relogio-icone"></i>
+                <span id="relogio-tv" class="fw-bold text-dark" style="font-variant-numeric: tabular-nums;">00:00</span>
             </div>
         </header>
 
@@ -166,7 +165,7 @@
 
         <footer>
             <div class="d-flex align-items-center">
-                <i class="bi bi-whatsapp text-success me-4" style="font-size: 4.5rem;"></i>
+                <i class="bi bi-whatsapp text-success me-3 footer-icone-zap"></i>
                 <div>
                     <div class="footer-plantao">Plantão 24 Horas</div>
                     <div class="footer-telefone">(84) 98630-8443</div>
@@ -174,7 +173,7 @@
             </div>
             <div class="text-end">
                 <div class="d-flex align-items-center justify-content-end mb-1">
-                    <i class="bi bi-geo-alt-fill text-warning me-3" style="font-size: 2.5rem;"></i>
+                    <i class="bi bi-geo-alt-fill text-warning me-2 footer-icone-local"></i>
                     <span class="footer-local">Memorial São Pedro</span>
                 </div>
                 <div class="footer-end">Rua Francisco Bittencourt, 211 - Vila Nova</div>
@@ -194,24 +193,25 @@
         atualizarRelogio();
 
         // 2. Rotação do Monitor
-        let anguloAtual = parseInt(localStorage.getItem('tvAnguloFinalizadoDefinitivo')) || 0;
+        let anguloAtual = parseInt(localStorage.getItem('tvAnguloFinalVertical')) || 0;
         const wrapper = document.getElementById('tv-wrapper');
 
         function aplicarRotacao() {
             let anguloNormalizado = ((anguloAtual % 360) + 360) % 360;
+            // É aqui que a mágica acontece. O CSS detecta essa classe e diminui as fontes!
             if (anguloNormalizado === 90 || anguloNormalizado === 270) {
                 wrapper.classList.add('vertical');
             } else {
                 wrapper.classList.remove('vertical');
             }
             wrapper.style.transform = `translate(-50%, -50%) rotate(${anguloAtual}deg)`;
-            localStorage.setItem('tvAnguloFinalizadoDefinitivo', anguloAtual);
+            localStorage.setItem('tvAnguloFinalVertical', anguloAtual);
         }
         function girar(graus) { 
             anguloAtual += graus; 
             aplicarRotacao(); 
         }
-        aplicarRotacao(); // Aplica a rotação salva na primeira carga
+        aplicarRotacao(); 
 
         // 3. Tela Cheia
         function telaCheia() {
